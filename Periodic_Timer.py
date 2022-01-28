@@ -9,17 +9,15 @@ Feel free to download, modify, and use as you wish, as long as it's for non-comm
 
 Made with:
 - PySimpleGUI v4.56.0
-- pydub v0.25.1
-- pygame v2.1.2
+- gensound v0.5.2
 """
 
 import os
-import pydub as dub
-import pygame.mixer as mixer
 from time import time
-import PySimpleGUI as sg
 from ast import literal_eval
-
+import PySimpleGUI as sg
+import gensound as gs
+import gensound.io as gs_io
 
 # setting up config dir and file
 path = f'{os.getenv("AppData")}\\Periodic_Timer'
@@ -40,7 +38,7 @@ def get_config(path):
 
 
 def main():
-    # much nicer theme for your eyes
+    # very nice theme for your eyes
     sg.theme('DarkGray11')
 
     # get the config of last run, or an empty dict if the file doesn't exist or is corrupted
@@ -60,7 +58,7 @@ def main():
     btn_stop = sg.Button('Stop', key='stop', visible=False)
     btn_pause_resume = sg.Button('Pause', key='pause/resume', visible=False)
 
-    btn_browse = sg.FileBrowse('Choose your alarm', initial_folder=os.path.dirname(CONFIG['audio_path']) if 'audio_path' in CONFIG else os.getenv('USERPROFILE'), file_types=(('Audio Files', '*.mp3 *.wav *.ogg *.aac *.mp2 *.oga *.aiff'),), key='browse', target='audio_path')
+    btn_browse = sg.FileBrowse('Choose your alarm', initial_folder=os.path.dirname(CONFIG['audio_path']) if 'audio_path' in CONFIG else os.getenv('USERPROFILE'), file_types=(('Audio Files', '*.mp3 *.wav *.ogg *.aac *.aif *.aifc *.aiff *.mp2 *.oga'),), key='browse', target='audio_path')
     txt_audio_path = sg.Text(text=CONFIG['audio_path'] if 'audio_path' in CONFIG else '', expand_x=True, key='audio_path')
 
     sli_volume = sg.Slider(key='volume', range=(-30, 15), default_value=CONFIG['volume'] if 'volume' in CONFIG else 0, resolution=1, orientation='h', disable_number_display=True, enable_events=True, expand_x=True)
@@ -73,7 +71,7 @@ def main():
         [sg.pin(btn_browse), txt_audio_path],
         ]
     window = sg.Window('Periodic Timer', LAYOUT, finalize=True)
-    mixer.init()
+    gs_io.IO.set_io('play', 'pygame')  # force gensound to use pygame https://github.com/Quefumas/gensound/discussions/28#discussioncomment-2068837
 
     # window go brrr
     while not window.was_closed():
@@ -104,7 +102,7 @@ def main():
             # setting up audio
             volume = int(value['volume'])
             audio_path = window['audio_path'].get()
-            audio_original = dub.AudioSegment.from_file(audio_path) if os.path.exists(audio_path) else None
+            audio_original = gs.WAV(audio_path) if os.path.exists(audio_path) else None
 
             # setting up timer
             hrs = int(value['hrs']); mins = int(value['mins']); secs = int(value['secs']); loop = value['loop']
@@ -159,8 +157,7 @@ def main():
                 if timer <= 0:
                     # audio_original is None if sound file doesn't exist
                     if audio_original:
-                        with (audio_original + volume).export(format='wav', tags={}, parameters=['-codec', 'copy']) as audio:
-                            mixer.Sound(audio).play()
+                        (audio_original * gs.Gain(volume)).play()
 
                     # reset timer if loop is checked
                     if loop:
@@ -187,7 +184,6 @@ def main():
                             window['start'](visible=True)
                             break
 
-    mixer.quit()
     window.close()
 
 main()
