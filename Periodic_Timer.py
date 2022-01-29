@@ -102,7 +102,7 @@ def main():
             window['mins'](value=f'{int(value["mins"]):02d}')
             window['secs'](value=f'{int(value["secs"]):02d}')
 
-        elif event == 'always_on_top':
+        if event == 'always_on_top':
             if value['always_on_top']:
                 window.keep_on_top_set()
             else:
