@@ -1,6 +1,6 @@
 Periodic Timer v1.0.0
 
-A timer which plays a chosen sound at the end and loops automatically and continuously
+A timer which plays a chosen sound file when finished and when required, loops automatically and continuously
 
 I made this to learn more about programming with GUIs and because I needed a timer like this for my own usage.
 
