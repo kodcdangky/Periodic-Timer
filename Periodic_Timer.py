@@ -226,4 +226,4 @@ def main():
 main()
 
 # Done_FIXME: FFmpeg uses a shitload of cpu (25%+) -> wasn't ffmpeg i just had to not do timeout=0 on windows.read(),
-# who knew running a infinite loop with no rest cost so much, i definitely did Kappa
+# who knew running a infinite loop with no rest cost so much, i definitely did :)
